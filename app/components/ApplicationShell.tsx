@@ -26,13 +26,16 @@ export default function ApplicationShell(){
     }, [a, b]);
     */
 
-    // useEffect(
-    //     () => {}
+    // useEffect(() => {
+    //         if(!LoggedIn) {
+    //             return(<><AuthComp LoggedIn={LoggedIn} setLoggedIn={setLoggedIn}/></>);
+    //         }
+    //     }
     // )
 
     return(
         <div className="">
-            <AuthComp LoggedIn={LoggedIn} setLoggedIn={setLoggedIn}/>
+            {!LoggedIn && <AuthComp LoggedIn={LoggedIn} setLoggedIn={setLoggedIn}/>}
             {/* need to be able to tell if the login was successful in order to continue/remove auth panel */}
             {/* {loggedInState ? <COMP/> : null (do nothing and wait until logged in)} */}
             { LoggedIn ? (<ApplicationList/>) : null }

@@ -31,7 +31,7 @@ export default function AuthComp( {LoggedIn, setLoggedIn} : AuthPanelProps ){
                 <div className="text-xs">test</div>
                 <button className="bg-blue-500" onClick={HandleClick}>Hi</button>                
             </div>
-            {LoggedIn ? <div>you logged in!</div> : <div>please log in</div>} {/* Conditional rendering in tsx */}
+            {LoggedIn ? <div>you logged in!</div> : null} {/* Conditional rendering in tsx */}
         </div>
     );
 }
