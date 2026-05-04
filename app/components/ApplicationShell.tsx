@@ -4,10 +4,14 @@ The main idea of this is to
 2. Allow user to make submissions of jobs they are applying for -> handle in separate comp
 3. on submit send that to a database (supabase) and track it there -< handle in 3rd separate com
 */
-
+import AuthComp from "./AuthComp";
 // DOM root entry "top level component"
 export default function ApplicationShell(){
     return(
-        <>test 2</>
+        <div className="">
+            <AuthComp />
+            {/* need to be able to tell if the login was successful in order to continue/remove auth panel */}
+            {/* {loggedInState ? <COMP/> : null (do nothing and wait until logged in)} */}
+        </div>
     );
 }
