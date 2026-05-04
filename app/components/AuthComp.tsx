@@ -2,20 +2,28 @@
 // a button to emulate being logged in
 "use client"
 import { useState } from "react";
+import React from "react"; // Allows for typing
 
 
+// This is the special feature of react being showcased!
+// Without the following defenition, it'll render. However, you'll be notified that you should define typing
+// (guessing its to avoid missusing props) Looks like a struct!
+type AuthPanelProps = {
+    LoggedIn: boolean;
+    setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 
+}
 
-
-export default function AuthComp(){
-    // State
-    const [clicked, setClick] = useState(false)
+// NOTE: you must assign the Prop typing within def
+export default function AuthComp( {LoggedIn, setLoggedIn} : AuthPanelProps ){ 
 
     // Handlers
     async function HandleClick(){
-        setClick(true)
+        setLoggedIn(true)
     }
 
+    // This is logic for returning shit in the case where you are not logged in {hmm for a moment, thought it might have been been like ternary logic}
+    // Ideally, we are just DEFINING component, which means parent should be in charge of deciding whether to show it or not.
     return(
         <div>
             <div className="rounded-2xl border border-red-500">
@@ -23,7 +31,7 @@ export default function AuthComp(){
                 <div className="text-xs">test</div>
                 <button className="bg-blue-500" onClick={HandleClick}>Hi</button>                
             </div>
-            {clicked ? <div>you logged in!</div> : <div>please log in</div>} {/* Conditional rendering in tsx */}
+            {LoggedIn ? <div>you logged in!</div> : <div>please log in</div>} {/* Conditional rendering in tsx */}
         </div>
     );
 }
