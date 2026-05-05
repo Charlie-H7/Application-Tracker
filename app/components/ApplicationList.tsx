@@ -7,6 +7,9 @@ I'm planning on having like a component for both the create and list, this howev
 */
 
 export default function ApplicationList(){
+
+
+
     return(
         <div>
             {/* Need a way to input a job, (don't worry about connection first)
@@ -22,7 +25,8 @@ export default function ApplicationList(){
             */}
 
             {/* Form  {Make flexbox} */} 
-            <form action="">
+            {/* <form action=""> Action is for sending data to a site (like the python api routes I had set up in that other project)*/}
+            <form onSubmit={() => console.log("submitted")} className="flex flex-col gap-4">
                 <label htmlFor="company">Company</label>
                 <input required type="text" name="company" id="company" />
                 <label htmlFor="job">Job</label>
@@ -31,9 +35,10 @@ export default function ApplicationList(){
                 <input type="text" name="status" id="status" />
                 <label htmlFor="date">Date</label>
                 <input type="text" name="date" id="date" />
-                <label htmlFor="Link"></label>
+                <label htmlFor="Link">Link</label>
+                <input type="text" name="Link" id="Link" />
             </form>
-            
+            <button type="submit" onSubmit={() => console.log("submitted")}>Submit</button>
         </div>
-    )
+    );
 }
