@@ -20,16 +20,32 @@ export default function AuthComp( {supabase, session, authLoading} ) {
     // Data we need to track; the Data used to submit the form
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [busy, setBusy] = useState(false); // This is the state that will track whether the login process is currently in progress or not, which will be used to disable the login button while the login process is ongoing to prevent multiple login attempts
+    const [message, setMessage] = useState<string | null>(null); // This is the state that will hold any error messages that may occur during the login process, which will be used to display error messages to the user if the login process fails for any reason
+
+    // const [LoggedIn, setLoggedIn] = useState(false); --- IGNORE ---
+    // const { supabase } = props; --- IGNORE ---
+    // const { session } = props; --- IGNORE ---
+    // const { authLoading } = props; --- IGNORE ---
     // Handlers
     async function handleLogin() {
+        // Setting login state to busy before starting the login process
+        setBusy(true);
+        setMessage(null); // Clear any previous messages
+
         const { error } = await supabase.auth.signInWithPassword({
             email: email.trim(), // Trim whitespace from email input
             password,
         });
+        setBusy(false); // Reset busy state after login attempt
+
         if (error) {
             console.error("Error logging in:", error.message);
+            setMessage(error.message); // Set error message to display to the user
+            console.error("Sigma");
         } else {
-            console.log("Logged in successfully!");
+            // setPassword(""); // Clear password field for user on successful login
+            console.log("I think this is the culprit");
         }        
     }
 

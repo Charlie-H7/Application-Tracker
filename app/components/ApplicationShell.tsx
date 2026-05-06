@@ -29,14 +29,23 @@ export default function ApplicationShell(){
     const [authLoading, setAuthLoading] = useState(() => supabase !== null); // This is the state that will track whether the auth state is still loading or not, which will be used to conditionally render the auth component
 
     useEffect(() => {
-        // This runs on mount
-        const getSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setSession(session);
-            setAuthLoading(false);
-        };
 
-        getSession();
+        // Check if there's an active session on component mount (This verion is better for handling the case where the component unmounts before the async operation completes, which can prevent potential memory leaks or errors from trying to update state on an unmounted component)
+        let cancelled = false; // if the component unmounts before the async operation completes, we can use this flag to prevent state updates on an unmounted component
+        void supabase.auth.getSession().then(({ data }) => {
+            if (cancelled) return;
+            setSession(data.session ?? null);
+            setAuthLoading(false);
+        });
+
+        // // This runs on mount (below) and also sets up a listener for auth state changes, which will update the session state whenever the auth state changes (e.g. user logs in or out)
+        // const getSession = async () => {
+        //     const { data: { session } } = await supabase.auth.getSession();
+        //     setSession(session);
+        //     setAuthLoading(false);
+        // };
+
+        // getSession(); // Call the function to get the session on component mount
 
         // Listen for auth state changes
         const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -45,6 +54,7 @@ export default function ApplicationShell(){
 
         // Cleanup the listener on unmount
         return () => {
+            cancelled = true;
             authListener.subscription.unsubscribe();
         };
     }, [supabase]);
@@ -73,10 +83,34 @@ export default function ApplicationShell(){
         //     {/* {loggedInState ? <COMP/> : null (do nothing and wait until logged in)} */}
         //     { LoggedIn ? (<ApplicationList/>) : null }
         // </div>
+        // { session ? (<ApplicationList />) : authLoading : (<AuthComp supabase={supabase} session={session} authLoading={authLoading} />) }
         <div>
             <AuthComp supabase={supabase} session={session} authLoading={authLoading} />
-            <div className="">tk</div>
+            {session ? (
+                <ApplicationList />
+            ) : authLoading ? null : (
+                <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50/50 px-6 py-12 text-center text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-400">
+                Sign in above. After authentication, the app reads and writes the{" "}
+                <code className="rounded bg-zinc-200/80 px-1 py-0.5 text-xs dark:bg-zinc-800">
+                    applications
+                </code>{" "}
+                table in Postgres; Row Level Security keeps each user on their own
+                rows.
+                </div>
+            )}
+            {/* { session ? (<ApplicationList />) : authLoading ? (
+                <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50/50 px-6 py-12 text-center text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-400">
+                Sign in above. After authentication, the app reads and writes the{" "}
+                <code className="rounded bg-zinc-200/80 px-1 py-0.5 text-xs dark:bg-zinc-800">
+                    applications
+                </code>{" "}
+                table in Postgres; Row Level Security keeps each user on their own
+                rows.
+                </div>
+                )
+            ) } */}
         </div>
+
     );
 }
 
