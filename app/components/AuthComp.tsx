@@ -50,6 +50,14 @@ export default function AuthComp( {supabase, session, authLoading} ) {
         }        
     }
 
+    // This is the handler for logging out the user, which will be passed down to the ApplicationList component, which will have a logout button that will call this handler when clicked
+    async function handleLogout() {
+        setBusy(true);
+        setMessage(null)
+        await supabase.auth.signOut();
+        setBusy(false); // Reset busy state after logout attempt
+    }
+
     
     
 
@@ -70,6 +78,18 @@ export default function AuthComp( {supabase, session, authLoading} ) {
     //         {LoggedIn ? <div>you logged in!</div> : null} {/* Conditional rendering in tsx */}
     //     </div>
     // );
+
+    if (session) {
+        return(
+            <div className="border border-red-500">
+                <p>You are signed in as bruh</p>
+                <button onClick={handleLogout}>Logout</button>
+            </div>
+        )
+    }
+    
+
+    // Return if user is not logged in
     return(
         <div>
         {/* {session ? (<ApplicationList/>) :  */}
