@@ -44,8 +44,8 @@ export default function AuthComp( {supabase, session, authLoading} ) {
             setMessage(error.message); // Set error message to display to the user
             console.error("Sigma");
         } else {
-            // setPassword(""); // Clear password field for user on successful login
-            console.log("I think this is the culprit");
+            setPassword(""); // Clear password field for user on successful login
+            // console.log("I think this is the culprit");
         }        
     }
 
