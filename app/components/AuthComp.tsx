@@ -3,6 +3,7 @@
 "use client"
 import { useState } from "react";
 import React from "react"; // Allows for typing
+import ApplicationList from "./ApplicationList";
 
 
 // This is the special feature of react being showcased!
@@ -71,16 +72,46 @@ export default function AuthComp( {supabase, session, authLoading} ) {
     // );
     return(
         <div>
-            <form action="">
-                <label htmlFor="email">email</label>
-                <input required type="text" name="email" id="email" onChange={(e) => {setEmail(e.target.value)}}/>
-                <label htmlFor="password">password</label>
-                <input type="text" name="password" id="password" onChange={(e) => {setPassword(e.target.value)}} />
-            </form>
+        {/* {session ? (<ApplicationList/>) :  */}
+            {/* // ( 
+            // <div>
+            //     <form action="">
+            //         <label htmlFor="email">email</label>
+            //         <input required type="text" name="email" id="email" onChange={(e) => {setEmail(e.target.value)}}/>
+            //         <label htmlFor="password">password</label>
+            //         <input type="text" name="password" id="password" onChange={(e) => {setPassword(e.target.value)}} />
+            //     </form>
 
-            <button onClick={handleLogin}>Login</button>
+            //     <button onClick={handleLogin}>Login</button>
+            // </div>) */}
+        {/* If there is no session user return nothing {Thats handled in applicationShell } */}
+        {session ? null : ( 
+            <div>
+                 <form action="">
+                    <label htmlFor="email">email</label>
+                    <input required type="text" name="email" id="email" onChange={(e) => {setEmail(e.target.value)}}/>
+                    <label htmlFor="password">password</label>
+                    <input type="text" name="password" id="password" onChange={(e) => {setPassword(e.target.value)}} />
+                </form>
+
+                <button onClick={handleLogin}>Login</button>
+            </div>)
+        }
+
+        {/* // (
+        //     <div>
+        //     <form action="">
+        //         <label htmlFor="email">email</label>
+        //         <input required type="text" name="email" id="email" onChange={(e) => {setEmail(e.target.value)}}/>
+        //         <label htmlFor="password">password</label>
+        //         <input type="text" name="password" id="password" onChange={(e) => {setPassword(e.target.value)}} />
+        //     </form>
+
+        //         <button onClick={handleLogin}>Login</button>
+        //     </div>)
+        //     : null
+        // } */}
         </div>
-            
     );
 }
 
