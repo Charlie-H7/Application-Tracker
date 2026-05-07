@@ -38,13 +38,6 @@ export default function ApplicationShell(){
             setAuthLoading(false);
         });
 
-        // // This runs on mount (below) and also sets up a listener for auth state changes, which will update the session state whenever the auth state changes (e.g. user logs in or out)
-        // const getSession = async () => {
-        //     const { data: { session } } = await supabase.auth.getSession();
-        //     setSession(session);
-        //     setAuthLoading(false);
-        // };
-
         // getSession(); // Call the function to get the session on component mount
 
         // Listen for auth state changes
