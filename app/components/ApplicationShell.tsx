@@ -87,7 +87,7 @@ export default function ApplicationShell(){
         <div>
             <AuthComp supabase={supabase} session={session} authLoading={authLoading} />
             {session ? (
-                <ApplicationList />
+                <ApplicationList supabase={supabase} />
             ) : authLoading ? null : (
                 <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50/50 px-6 py-12 text-center text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-400">
                 Sign in above. After authentication, the app reads and writes the{" "}
