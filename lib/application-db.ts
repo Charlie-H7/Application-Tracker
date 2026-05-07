@@ -44,3 +44,24 @@ export async function fetchApplications(
   if (error) throw error;
   return (data as ApplicationRow[]).map(rowToApplication);
 }
+
+export async function insertApplication(
+  supabase: SupabaseClient,
+  application: Omit<ApplicationType, "id">,
+): Promise<ApplicationType> {
+  const { data, error } = await supabase
+    .from("applications")
+    .insert({
+      company: application.company,
+      role: application.role,
+      status: application.status,
+      appliedOn: application.appliedOn,
+      link: application.link,
+      notes: application.notes,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return rowToApplication(data as ApplicationRow);
+}

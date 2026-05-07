@@ -12,7 +12,7 @@ import { ApplicationStatus, ApplicationType } from "../types/application"
 import { APPLICATION_STATUSES } from "@/app/types/application";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { fetchApplications } from "@/lib/application-db";
+import { fetchApplications, insertApplication } from "@/lib/application-db";
 import { formatSupabaseError } from "@/lib/format-supabase-error"; // This is a utility function that formats errors from the supabase client into a more user-friendly format, which can be used to display error messages to the user in a more understandable way. By using a separate function to handle error formatting, we can centralize our error handling logic and ensure that all errors from the supabase client are consistently formatted and presented to the user in a clear and informative manner.
 
 const emptyform = {
@@ -57,6 +57,8 @@ export default function ApplicationList( {supabase} : ApplicationsTrackerProps){
     const [listError, setListError] = useState<string | null>(null); // This is the state that will hold any error messages that may occur while fetching the list of applications from the database, which will be used to display error messages to the user if the data fetching process fails for any reason. By tracking errors in a separate state variable, we can provide more informative feedback to the user and help them understand what went wrong if there are issues with fetching the data.
     const [form, setForm] = useState(emptyform); // This is the state that will hold the current values of the form fields for creating a new application, which will be used to track the user's input as they fill out the form. By using a state variable to manage the form data, we can easily update and access the form values when the user submits the form, allowing us to create a new application object based on the user's input and add it to the list of applications in the UI. The emptyform variable is an object that defines the initial values for each field in the form, which can help ensure that all fields are properly initialized and prevent issues with undefined values when managing the form state.
     const [filter, setFilter] = useState<ApplicationStatus | "All">("All"); // This is the state that will hold the current filter value for the list of applications, which will be used to track the user's selection for filtering the applications based on their status. By using a state variable to manage the filter value, we can easily update and access the selected filter when rendering the list of applications, allowing us to conditionally display only the applications that match the selected status or show all applications if the "All" filter is selected. The ApplicationStatus type is a union type that defines the possible values for the status field in an application object, which can help ensure that only valid status values are used when managing the filter state and rendering the list of applications.
+    const [formLoading, setFormLoading] = useState(false); // Track if form submission is in progress
+    const [formError, setFormError] = useState<string | null>(null); // Track any errors during form submission
 
     // Other functions:
     const refresh = useCallback(async () => {
@@ -129,6 +131,39 @@ export default function ApplicationList( {supabase} : ApplicationsTrackerProps){
         [supabase, refresh],
     );
 
+    const handleFormSubmit = useCallback(
+        async (e: React.FormEvent) => {
+            e.preventDefault();
+            setFormError(null);
+            setFormLoading(true);
+
+            try {
+                // Validate required fields
+                if (!form.company || !form.job || !form.status) {
+                    throw new Error("Company, Job, and Status are required");
+                }
+
+                await insertApplication(supabase, {
+                    company: form.company,
+                    role: form.job,
+                    status: form.status as ApplicationStatus,
+                    appliedOn: form.date || null,
+                    link: form.link,
+                    notes: form.comments,
+                });
+
+                // Clear form and refresh list
+                setForm(emptyform);
+                await refresh();
+            } catch (err) {
+                setFormError(formatSupabaseError(err, "Could not add application."));
+            } finally {
+                setFormLoading(false);
+            }
+        },
+        [form, supabase, refresh],
+    );
+
     const countsByStatus = useMemo(() => {
         const c = new Map<ApplicationStatus | "All", number>();
         c.set("All", application.length);
@@ -141,6 +176,7 @@ export default function ApplicationList( {supabase} : ApplicationsTrackerProps){
 
     return(
         <div>
+            {listError && <div className="mb-4 rounded bg-red-100 p-3 text-red-800">{listError}</div>}
             {/* Need a way to input a job, (don't worry about connection first)
                 For right now assume you're just inputting data that is to be submitted elsewhere 
                 
@@ -155,19 +191,70 @@ export default function ApplicationList( {supabase} : ApplicationsTrackerProps){
 
             {/* Form  {Make flexbox} */} 
             {/* <form action=""> Action is for sending data to a site (like the python api routes I had set up in that other project)*/}
-            <form onSubmit={() => console.log("submitted")} className="flex flex-col gap-4">
-                <label htmlFor="company">Company</label>
-                <input required type="text" name="company" id="company" />
-                <label htmlFor="job">Job</label>
-                <input type="text" name="job" id="job" />
-                <label htmlFor="status">Status</label>
-                <input type="text" name="status" id="status" />
-                <label htmlFor="date">Date</label>
-                <input type="text" name="date" id="date" />
-                <label htmlFor="Link">Link</label>
-                <input type="text" name="Link" id="Link" />
+            <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
+                <label htmlFor="company">Company *</label>
+                <input 
+                    required 
+                    type="text" 
+                    name="company" 
+                    id="company" 
+                    value={form.company}
+                    onChange={(e) => setForm({ ...form, company: e.target.value })}
+                />
+                <label htmlFor="job">Job Title *</label>
+                <input 
+                    required 
+                    type="text" 
+                    name="job" 
+                    id="job" 
+                    value={form.job}
+                    onChange={(e) => setForm({ ...form, job: e.target.value })}
+                />
+                <label htmlFor="status">Status *</label>
+                <select 
+                    required 
+                    name="status" 
+                    id="status"
+                    value={form.status}
+                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                >
+                    <option value="">Select a status</option>
+                    {APPLICATION_STATUSES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                    ))}
+                </select>
+                <label htmlFor="date">Date Applied</label>
+                <input 
+                    type="date" 
+                    name="date" 
+                    id="date" 
+                    value={form.date}
+                    onChange={(e) => setForm({ ...form, date: e.target.value })}
+                />
+                <label htmlFor="link">Link</label>
+                <input 
+                    type="url" 
+                    name="link" 
+                    id="link"
+                    value={form.link}
+                    onChange={(e) => setForm({ ...form, link: e.target.value })}
+                />
+                <label htmlFor="comments">Comments</label>
+                <textarea 
+                    name="comments" 
+                    id="comments"
+                    value={form.comments}
+                    onChange={(e) => setForm({ ...form, comments: e.target.value })}
+                />
+                <button 
+                    type="submit" 
+                    disabled={formLoading}
+                    className="rounded bg-blue-500 px-4 py-2 text-white disabled:opacity-50"
+                >
+                    {formLoading ? "Submitting..." : "Add Application"}
+                </button>
+                {formError && <div className="text-red-500">{formError}</div>}
             </form>
-            <button type="submit" onSubmit={() => console.log("submitted")}>Submit</button>
 
             {/* Now to actually implement submitting something to the db */}
 
