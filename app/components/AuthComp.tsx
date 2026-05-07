@@ -29,26 +29,40 @@ export default function AuthComp( {supabase, session, authLoading} ) {
     // const { session } = props; --- IGNORE ---
     // const { authLoading } = props; --- IGNORE ---
     // Handlers
-    async function handleLogin() {
-        // Setting login state to busy before starting the login process
-        setBusy(true);
-        setMessage(null); // Clear any previous messages
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email: email.trim(), // Trim whitespace from email input
-            password,
-        });
-        setBusy(false); // Reset busy state after login attempt
+// async function handleLogin() {
+//     // Setting login state to busy before starting the login process
+//     setBusy(true);
+//     setMessage(null); // Clear any previous messages
 
-        if (error) {
-            console.error("Error logging in:", error.message);
-            setMessage(error.message); // Set error message to display to the user
-            console.error("Sigma");
-        } else {
-            setPassword(""); // Clear password field for user on successful login
-            // console.log("I think this is the culprit");
-        }        
-    }
+//     const { error } = await supabase.auth.signInWithPassword({
+//         email: email.trim(), // Trim whitespace from email input
+//         password,
+//     });
+//     setBusy(false); // Reset busy state after login attempt
+
+//     if (error) {
+//         console.error("Error logging in:", error.message);
+//         setMessage(error.message); // Set error message to display to the user
+//         console.error("Sigma");
+//     } else {
+//         setPassword(""); // Clear password field for user on successful login
+//         // console.log("I think this is the culprit");
+//     }        
+// }
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setMessage(null);
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    setBusy(false);
+    if (error) setMessage(error.message);
+    else setPassword("");
+  }
 
     // This is the handler for logging out the user, which will be passed down to the ApplicationList component, which will have a logout button that will call this handler when clicked
     async function handleLogout() {
@@ -78,6 +92,12 @@ export default function AuthComp( {supabase, session, authLoading} ) {
     //         {LoggedIn ? <div>you logged in!</div> : null} {/* Conditional rendering in tsx */}
     //     </div>
     // );
+
+    // This is just to ensure nothing displays before the 2nd screen if they are logged in
+    if (authLoading) {
+        return <div>Loading...</div>;
+    }
+
 
     if (session) {
         return(
